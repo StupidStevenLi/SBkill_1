@@ -1,0 +1,158 @@
+spring:
+  # 配置DataSource
+  datasource:
+    druid:
+      # 监控统计拦截的filters
+      filters: stat,wall
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/secondkill?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: 147258369
+      # 配置初始化大小/最小/最大
+      initial-size: 10
+      # 最小连接池数量
+      min-idle: 10
+      # 最大连接池数量
+      max-active: 20
+      # 获取连接时最大等待时间，单位毫秒。
+      # 配置了maxWait之后，缺省启用公平锁，并发效率会有所下降，如果需要可以通过配置useUnfairLock属性为true使用非公平锁。
+      max-wait: 60000
+      # 间隔多久进行一次检测，检测需要关闭的空闲连接
+      time-between-eviction-runs-millis: 60000
+      # 配置一个连接在连接池中的最小生存时间，单位毫秒。(连接保持空闲而不被驱逐的最小时间)
+      min-evictable-idle-time-millis: 300000
+      max-evictable-idle-time-millis: 900000
+      # 用来检测连接是否有效的sql，要求是一个查询语句，常用select 'x'。
+      # 如果validationQuery为null，testOnBorrow、testOnReturn、testWhileIdle都不会起作用。
+      validation-query: SELECT 1
+      # 建议配置为true，不影响性能，并且保证安全性。
+      # 申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。
+      test-while-idle: true
+      # 申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。
+      test-on-borrow: false
+      # 归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。
+      test-on-return: false
+      # 连接池中的minIdle数量以内的连接，空闲时间超过minEvictableIdleTimeMillis，则会执行keepAlive操作。
+      keep-alive: true
+      phy-max-use-count: 1000
+      # 有时粗心的程序编写者在从连接池中获取连接使用后忘记了连接的关闭，这样连池的连接就会逐渐达到maxActive直至连接池无法提供服务。
+      # 现代连接池一般提供一种“智能”的检查，但设置了removeAbandoned="true"时，当连接池连接数到达(getNumIdle() < 2) and (getNumActive() > getMaxActive() - 3) [空闲的连接小于2并且活动的连接大于(最大连接-3)] 时便会启动连接回收，那种活动时间超过removeAbandonedTimeout="60"的连接将会被回收，同时如果logAbandoned="true"设置为true,程序在回收连接的同时会打印日志。
+      # removeAbandoned是连接池的高级功能，理论上这中配置不应该出现在实际的生产环境，因为有时应用程序执行长事务，可能这种情况下，会被连接池误回收，该种配置一般在程序测试阶段，为了定位连接泄漏的具体代码位置，被开启。
+      # 生产环境中连接的关闭应该靠程序自己保证。
+      #      # 超过时间限制是否回收
+      #      remove-abandoned: true
+      #      # 超时时间；单位为秒。1800秒=30分钟
+      #      remove-abandoned-timeout: 1800
+      #      # 关闭abandoned连接时输出错误日志
+      #      log-abandoned: true
+      filter:
+        stat:
+          # 慢SQL记录
+          slow-sql-millis: 2000
+          log-slow-sql: true
+          merge-sql: true
+  #配置mvc
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+  #json序列化
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  #配置RabbitMQ
+  rabbitmq:
+    virtual-host: /
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        concurrency: 5
+        max-concurrency: 15
+        prefetch: 10
+  #配置邮箱
+  mail:
+    host: smtp.qq.com
+    username: 2639768075@qq.com
+    password: vhdrwzxxjzykecdb
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  #配置Redis
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+#配置Redisson
+redis:
+  config:
+    host: redis://127.0.0.1:6379
+
+#配置Zookeeper
+zk:
+  host: 127.0.0.1:2181
+  namespace: kill
+
+# 配置MyBatis
+mybatis:
+  check-config-location: true
+  mapper-locations: classpath:mappers/*.xml
+#  config-location: classpath:mybatis-config.xml
+#  type-aliases-package: com.lgy.kill.model.entity
+#配置PageHelper
+pagehelper:
+  helper-dialect: mysql
+  offsetAsPageNum: true
+  rowBoundsWithCount: true
+  pageSizeZero: true
+  reasonable: false
+  params: pageNum=pageHelperStart;pageSize=pageHelperRows
+  supportMethodsArguments: fasle
+  returnPageInfo: none
+
+#交换机, 消息队列, 路由, 死信队列, 死信交换机, 真正队列
+mq:
+  env: test1
+  success:
+    email:
+      queue: ${mq.env}.success.email.queue
+      exchange: ${mq.env}.success.email.exchange
+      routing:
+        key: ${mq.env}.success.email.routing.key
+      kill:
+        expire: 600000
+        dead:
+          queue: ${mq.env}.kill.item.success.kill.dead.queue
+          exchange: ${mq.env}.kill.item.success.kill.dead.exchange
+          routing:
+            key: ${mq.env}.kill.item.success.kill.dead.routing.key
+          real:
+            queue: ${mq.env}.kill.item.success.kill.dead.real.queue
+          prod:
+            exchange: ${mq.env}.kill.item.success.kill.dead.prod.exchange
+            routing:
+              key: ${mq.env}.kill.item.success.kill.dead.prod.routing.key
+#邮箱的信息
+mail:
+  send:
+    from: 2639768075@qq.com
+  kill:
+    item:
+      success:
+        subject: 商品抢购成功
+        content: 您好，您已成功抢购到商品:<strong style="color:red">%s</strong> ，复制该链接并在浏览器采用新的页面打开，即可查看抢购详情：${system.domain.url}/kill/record/detail/%s，并请您在1个小时内完成订单的支付，超时将失效该订单哦！祝你生活愉快！
+#指定的url
+system:
+  domain:
+    url: http://localhost:8080/kill
+#定时器
+scheduler:
+  expire:
+    orders:
+      time: 10

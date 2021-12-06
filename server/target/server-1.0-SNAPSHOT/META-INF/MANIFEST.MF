@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Created-By: IntelliJ IDEA
+Built-By: 26397
+Build-Jdk: version 14.0.2
+Implementation-Version: 1.0-SNAPSHOT
+Implementation-Vendor-Id: com.lgy.kill
+Main-Class: com.lgy.kill.server.MainApplication
+
